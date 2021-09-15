@@ -3,14 +3,16 @@
 #' author: 'Jia Nie ^1, Author Two ^1^'
 #' abstract: |
 #'  | [TRIPOD 2] Provide a summary of objectives, study design, setting, participants, sample size, predictors, outcome, statistical analysis, results, and conclusions.
-#' documentclass: article
+#' documentclass: articl'"
+#' date: " `r Sys.Date()``
 #' description: 'Manuscript'
 #' clean: false
 #' self_contained: true
 #' number_sections: false
 #' keep_md: true
 #' fig_caption: true#' 
-#' css: production.css
+#' css: "`r library(here); here('production.css')`"
+#' #' css: `production.css`
 #' output: # To include in the header of your script
 #'   html_document:
 #'    code_folding: hide
@@ -243,5 +245,8 @@ base %+% dat1
 base %+% geom_point(aes(color=Gender), data=dat1)
 
 
-file.exists('week 1.R')
+
+
+
+
 
