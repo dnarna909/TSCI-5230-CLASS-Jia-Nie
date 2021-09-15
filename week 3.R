@@ -59,6 +59,9 @@ class(dat0$WT)
 summary(dat0)
 dat0$WT <- as.numeric(dat0$WT)
 arrange(dat0, Gender, STUDY, desc(WT)) 
+
+#' ## rename()
+#' ## summarize
 #' 
 #' 
 #' 
