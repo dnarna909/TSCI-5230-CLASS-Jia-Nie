@@ -332,17 +332,16 @@ summary(fitAIC) %>% tidy
 #' All possible three-way interactions: ~ (A+B+C)^3
 #' All possible two way interactions: ~ (A+B+C)^2
 
-fit.all <- lm(FatMassPercentage ~ (Gender + WT + HT + LBM + Age + BMI + SA + bk)^2, data = data1train) # method 1
-fitAIC <- step(fit, scope = list(lower = fit.null, upper = fit.all), scale = 0, direction = "both")
+fit.all2way <- lm(FatMassPercentage ~ (Gender + WT + HT + LBM + Age + BMI + SA + bk)^2, data = data1train) # method 1
+fitAIC <- step(fit, scope = list(lower = fit.null, upper = fit.all2way), scale = 0, direction = "both")
 summary(fitAIC) 
 summary(fitAIC) %>% tidy
 
 
-fit.all <- lm(FatMassPercentage ~ (Gender + WT + HT + LBM + Age + BMI + SA + bk)^3, data = data1train) # method 1
-fitAIC <- step(fit, scope = list(lower = fit.null, upper = fit.all), scale = 0, direction = "both")
+fit.all3way <- lm(FatMassPercentage ~ (Gender + WT + HT + LBM + Age + BMI + SA + bk)^3, data = data1train) # method 1
+fitAIC <- step(fit, scope = list(lower = fit.null, upper = fit.all3way), scale = 0, direction = "both")
 summary(fitAIC) 
 summary(fitAIC) %>% tidy
-
 
 
 sample(1:10)# return random number
@@ -354,4 +353,20 @@ sample(1:10) # create a second different new number each time.
 
 
 
+#' ## diagnostics
+plot(fit.all2way)
+anova(fit.all2way,  fit.all3way) # 
 
+plot(predict(fit.all3way,data1test)~data1test$Age)
+
+plot(predict(fit.all2way,data1test)~data1test$Age)
+
+plot(data1test$Age, predict(fit.all2way,data1test)-data1test$Age)
+
+plot(data1test$Age, predict(fit.all3way,data1test)-data1test$Age)
+
+plot(data1test$Age, predict(fit.all,data1test)-data1test$Age)
+
+plot(data1test$Age, predict(fit,data1test)-data1test$Age)
+
+plot(data1train$Age, predict(fit,data1train)-data1train$Age)
