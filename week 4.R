@@ -29,6 +29,7 @@ library(GGally);
 library(rio);
 library(dplyr);
 library(pander);
+library(broom);
 #library(synthpop);
 #' Here are the libraries R currently sees:
 search() %>% pander();
@@ -240,12 +241,116 @@ ggplot(dat0, aes(x=WT, y=HT) ) + layers[-2] + geom_smooth(method = "lm",fill = "
 #' To override the data, you must use %+%
 base <- ggplot(dat0,aes(x=WT, y=HT) ) + geom_smooth(color = "red") + geom_smooth(method = "lm", color = "blue") + geom_point(aes(color = Gender))
 base %+% dat1
-
+#'
 #' To override the data for just one layer without changing the others, you can specify the data=... argument for just that one.
 base %+% geom_point(aes(color=Gender), data=dat1)
+#' 
+#' 
+#' 
+#' 2021-09-22 class
+#' `facet_grid`
+#' 
+ggplot(dat0, aes(x=WT, y=HT) ) + layers + facet_grid(STUDY ~ . )
+ggplot(dat0, aes(x=WT, y=HT) ) + layers + coord_cartesian(xlim=c(50,100))
+#'
+#'
+#'packages upgrading while upgrade R:
+packageStatus()
+packageStatus()$inst %>% subset(Status=='upgrade') %>% rownames() # list the packages that needs upgrade
+packageStatus()$inst %>% subset(Status=='upgrade') %>% rownames %>% gsub('\\.1','',.)
+packs <- packageStatus()$inst %>% subset(Status=='upgrade') %>% rownames %>% gsub('\\.1','',.)
+install.packages(packs[1])
+#'
+#'
+#'
+#' Python in R
+library(reticulate)
+repl_python() # click Y for install python
+#' Reticulate 1.20 REPL -- A Python interpreter in R.
+#' 
+#' switch between python and R
+#' leave python: press `esc`
+#' enter python: 
+repl_python() 
+#' 
+#' 
+#' 
+
+#' ## model fitting/ variable selection
+sample(1:10)
+?browser()
+
+#' Set all the two-value columns to be TRUE/FALSE
+dat1 <- mutate(dat0, across(where( function(xx) length(unique(xx))<3), as.factor), group = {1}); # {} run everything in the brackets, then put in R
+dat1 <- mutate(dat0, across(where( function(xx) length(unique(xx))<3), as.factor), group = {browser(); 1}); # ; seperate two functions 
+head(dat1$group)
+sample(c("test", "train"), size = 10, replace = TRUE)
+sample(c("test", "train"), size = n(), replace = TRUE) # generate arbitarial number of values
+dat1$group %>% table
+
+set.seed(10)
+dat1 <- mutate(dat0, across(where( function(xx) length(unique(xx))<3), as.factor), group = sample(c("test", "train"), size = n(), replace = TRUE)); # ; seperate two functions 
+dat1$group %>% table
+
+# subset to create training and test data
+?subset
+data1train <- subset(dat1, subset = group=="train") # creates a subset for train
+data1test <- subset(dat1, subset = group=="test") # creates a subset for test
+
+# or generate new training data
+data1train <- dat1[sample(1:nrow(dat1), nrow(dat1), replace = TRUE), ] # creates a training data
+fit <- lm(FatMassPercentage ~ BMI, data = data1train)
+summary(fit)
+summary(fit) %>% tidy # tidy function is in the library(broom)
+fit %>% tidy # tidy function is in the library(broom)
+glance(fit)# in broom package, show a quick look at all of the summary statictics
+
+#' create a null model
+fit.null <- lm(FatMassPercentage ~ 1, data = data1train) # generate a null model
+summary(fit.null)
+
+anova(fit.null, fit) # comparing two models
+
+#' create an all encompassing model
+fit.all <- lm(FatMassPercentage ~ Gender + WT + HT + LBM + Age + BMI + SA + bk, data = data1train) # method 1
+colnames(data1train) %>% paste0(collapse=' + ')
+fit.all <- update(fit, .~ Gender + WT + HT + LBM + Age + BMI + SA + bk ) # method 2# To keep the original outcome: .~ # To keep original predictors: ~.
+summary(fit.all)
+anova(fit, fit.all)
+anova(fit.null, fit, fit.all) # 
+
+#' stepwizer regression: step()
+#' args(step)
+fitAIC <- step(fit, scope = list(lower = fit.null, upper = fit.all), scale = 0, direction = "both")
+summary(fitAIC) 
+summary(fitAIC) %>% tidy
+
+#' Additive model: OUTCOME ~ PRED1 + PRED2 + PRED3 + ...
+#' Interaction model: OUTCOME ~ PRED1*PRED2*PRED3 ...
+#' A*B means: A + B + A:B
+#' A*B*C means: A + B + C + A:B + A:C + B:C + A:B:C
+#' All possible three-way interactions: ~ (A+B+C)^3
+#' All possible two way interactions: ~ (A+B+C)^2
+
+fit.all <- lm(FatMassPercentage ~ (Gender + WT + HT + LBM + Age + BMI + SA + bk)^2, data = data1train) # method 1
+fitAIC <- step(fit, scope = list(lower = fit.null, upper = fit.all), scale = 0, direction = "both")
+summary(fitAIC) 
+summary(fitAIC) %>% tidy
+
+
+fit.all <- lm(FatMassPercentage ~ (Gender + WT + HT + LBM + Age + BMI + SA + bk)^3, data = data1train) # method 1
+fitAIC <- step(fit, scope = list(lower = fit.null, upper = fit.all), scale = 0, direction = "both")
+summary(fitAIC) 
+summary(fitAIC) %>% tidy
 
 
 
+sample(1:10)# return random number
+
+project_seed <- 17589005
+set.seed(project_seed)
+sample(1:10) # after set.seed, you get the same number each time.
+sample(1:10) # create a second different new number each time.
 
 
 
